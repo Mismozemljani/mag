@@ -1,0 +1,2 @@
+# mag
+App za magacin
