@@ -7,12 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Edit, Trash2, History } from "lucide-react"
 import { EditItemDialog } from "@/components/edit-item-dialog"
 import { SupplierHistoryDialog } from "@/components/supplier-history-dialog"
-import type { Item, InputHistory } from "@/lib/types"
+import { StockHistoryDialog } from "@/components/stock-history-dialog"
+import type { Item, InputHistory, Reservation, Pickup } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 interface ItemsTableProps {
   items: Item[]
   inputHistory: InputHistory[]
+  reservations: Reservation[]
+  pickups: Pickup[]
   onUpdateItem?: (item: Item) => void
   onDeleteItem?: (itemId: string) => void
   isAdmin: boolean
@@ -22,6 +25,8 @@ interface ItemsTableProps {
 export function ItemsTable({
   items,
   inputHistory,
+  reservations,
+  pickups,
   onUpdateItem,
   onDeleteItem,
   isAdmin,
@@ -29,6 +34,7 @@ export function ItemsTable({
 }: ItemsTableProps) {
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [historyItem, setHistoryItem] = useState<Item | null>(null)
+  const [stockHistoryItem, setStockHistoryItem] = useState<Item | null>(null)
 
   const getStockBadgeVariant = (available: number, threshold: number) => {
     if (available <= 0) return "destructive"
@@ -63,6 +69,7 @@ export function ItemsTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Šifra</TableHead>
+                <TableHead>Lokacija</TableHead>
                 {isAdmin && <TableHead>Projekat</TableHead>}
                 <TableHead>Naziv</TableHead>
                 {isAdmin && <TableHead>Dobavljač</TableHead>}
@@ -77,24 +84,16 @@ export function ItemsTable({
                     <TableHead className="text-right">Ploče Kom</TableHead>
                   </>
                 )}
-                {!showLimitedColumns && (
-                  <>
-                    {isAdmin && <TableHead className="text-right">Ulaz</TableHead>}
-                    {isAdmin && <TableHead className="text-right">Izlaz</TableHead>}
-                  </>
-                )}
+                {!showLimitedColumns && <>{isAdmin && <TableHead className="text-right">Ulaz</TableHead>}</>}
                 <TableHead className="text-right">Stanje</TableHead>
-                {!showLimitedColumns && (
-                  <>
-                    {isAdmin && <TableHead className="text-right">Rezervisano</TableHead>}
-                    <TableHead className="text-right">Dostupno</TableHead>
-                  </>
-                )}
+                {!showLimitedColumns && <TableHead className="text-right">Dostupno</TableHead>}
+                {!showLimitedColumns && <>{isAdmin && <TableHead className="text-right">Rezervisano</TableHead>}</>}
                 {isAdmin && (
                   <>
                     <TableHead>Rezervisao</TableHead>
                     <TableHead>Vreme Rezervacije</TableHead>
                     <TableHead>Šifra Rezervacije</TableHead>
+                    <TableHead>Preuzeto</TableHead>
                     <TableHead>Preuzeo</TableHead>
                     <TableHead>Vreme Preuzimanja</TableHead>
                     <TableHead>Šifra Preuzimanja</TableHead>
@@ -107,6 +106,7 @@ export function ItemsTable({
               {items.map((item) => (
                 <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50">
                   <TableCell className="font-mono font-medium">{item.code}</TableCell>
+                  <TableCell>{item.lokacija || "-"}</TableCell>
                   {isAdmin && <TableCell>{item.project}</TableCell>}
                   <TableCell className="font-medium">{item.name}</TableCell>
                   {isAdmin && <TableCell>{item.supplier}</TableCell>}
@@ -139,25 +139,38 @@ export function ItemsTable({
                           </Button>
                         </TableCell>
                       )}
-                      {isAdmin && <TableCell className="text-right">{item.output}</TableCell>}
                     </>
                   )}
-                  <TableCell className="text-right">{item.stock}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="p-0 h-auto font-normal"
+                      onClick={() => setStockHistoryItem(item)}
+                    >
+                      {item.stock}
+                    </Button>
+                  </TableCell>
                   {!showLimitedColumns && (
-                    <>
-                      {isAdmin && <TableCell className="text-right">{item.reserved}</TableCell>}
-                      <TableCell className="text-right">
-                        <Badge className={cn(getStockBadgeColor(item.available, item.low_stock_threshold))}>
-                          {item.available}
-                        </Badge>
-                      </TableCell>
-                    </>
+                    <TableCell className="text-right">
+                      <Badge className={cn(getStockBadgeColor(item.available, item.low_stock_threshold))}>
+                        {item.available}
+                      </Badge>
+                    </TableCell>
+                  )}
+                  {!showLimitedColumns && (
+                    <>{isAdmin && <TableCell className="text-right">{item.reserved}</TableCell>}</>
                   )}
                   {isAdmin && (
                     <>
                       <TableCell>{item.rezervisao || "-"}</TableCell>
                       <TableCell className="text-xs">{formatDateTime(item.vreme_rezervacije)}</TableCell>
                       <TableCell className="font-mono text-xs">{item.sifra_rezervacije || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {pickups
+                          .filter((p) => p.item_id === item.id && p.confirmed_at)
+                          .reduce((sum, p) => sum + p.quantity, 0)}
+                      </TableCell>
                       <TableCell>{item.preuzeo || "-"}</TableCell>
                       <TableCell className="text-xs">{formatDateTime(item.vreme_preuzimanja)}</TableCell>
                       <TableCell className="font-mono text-xs">{item.sifra_preuzimanja || "-"}</TableCell>
@@ -207,6 +220,17 @@ export function ItemsTable({
           inputHistory={inputHistory}
           open={!!historyItem}
           onOpenChange={(open) => !open && setHistoryItem(null)}
+        />
+      )}
+
+      {stockHistoryItem && (
+        <StockHistoryDialog
+          item={stockHistoryItem}
+          inputHistory={inputHistory}
+          reservations={reservations}
+          pickups={pickups}
+          open={!!stockHistoryItem}
+          onOpenChange={(open) => !open && setStockHistoryItem(null)}
         />
       )}
     </>

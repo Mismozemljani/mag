@@ -8,12 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Package } from "lucide-react"
+import { Package, RefreshCw } from "lucide-react"
 import { useItems } from "@/contexts/items-context"
 import type { Item } from "@/lib/types"
 
 export function PickupDashboard() {
-  const { items, pickups, addPickup } = useItems()
+  const { items, pickups, addPickup, refresh } = useItems()
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false)
 
@@ -41,9 +41,15 @@ export function PickupDashboard() {
           </TabsList>
 
           <TabsContent value="items" className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-bold">Dostupni Artikli</h2>
-              <p className="text-muted-foreground">Pregledajte artikle i napravite preuzimanje</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Dostupni Artikli</h2>
+                <p className="text-muted-foreground">Pregledajte artikle i napravite preuzimanje</p>
+              </div>
+              <Button onClick={refresh} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Osveži
+              </Button>
             </div>
             <Card>
               <CardContent className="p-6">
@@ -81,9 +87,15 @@ export function PickupDashboard() {
           </TabsContent>
 
           <TabsContent value="pickups" className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-bold">Moja Preuzimanja</h2>
-              <p className="text-muted-foreground">Pregled svih vaših preuzimanja</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Moja Preuzimanja</h2>
+                <p className="text-muted-foreground">Pregled svih vaših preuzimanja</p>
+              </div>
+              <Button onClick={refresh} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Osveži
+              </Button>
             </div>
             <Card>
               <CardContent className="p-6">

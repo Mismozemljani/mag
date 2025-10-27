@@ -6,7 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 import type { Item } from "@/lib/types"
+import { useItems } from "@/contexts/items-context"
 
 interface AddItemDialogProps {
   open: boolean
@@ -32,8 +35,10 @@ interface AddItemDialogProps {
 }
 
 export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogProps) {
+  const { items } = useItems()
   const [formData, setFormData] = useState({
     code: "",
+    lokacija: "", // Added lokacija field
     project: "Skladište",
     name: "",
     supplier: "",
@@ -48,11 +53,23 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
     low_stock_threshold: 10,
   })
 
+  const hasOkovData = formData.okov_ime || formData.okov_cena > 0 || formData.okov_kom > 0
+  const hasPloceData = formData.ploce_ime || formData.ploce_cena > 0 || formData.ploce_kom > 0
+
+  const trimmedCode = formData.code.trim()
+  const trimmedName = formData.name.trim()
+  const existingItem = items.find((item) => item.code.trim() === trimmedCode && item.name.trim() === trimmedName)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onAddItem(formData)
+    onAddItem({
+      ...formData,
+      code: trimmedCode,
+      name: trimmedName,
+    })
     setFormData({
       code: "",
+      lokacija: "",
       project: "Skladište",
       name: "",
       supplier: "",
@@ -72,9 +89,22 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Dodaj Novi Artikal</DialogTitle>
-          <DialogDescription>Unesite podatke o novom artiklu</DialogDescription>
+          <DialogTitle>Dodaj Artikal ili Novu Količinu</DialogTitle>
+          <DialogDescription>
+            Ako šifra i naziv već postoje, dodaće se nova količina od novog dobavljača
+          </DialogDescription>
         </DialogHeader>
+
+        {existingItem && trimmedCode && trimmedName && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Artikal sa šifrom "{trimmedCode}" i nazivom "{trimmedName}" već postoji. Nova količina i dobavljač će biti
+              dodati postojećem artiklu.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -87,11 +117,12 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="project">Projekat</Label>
+              <Label htmlFor="lokacija">Lokacija</Label>
               <Input
-                id="project"
-                value={formData.project}
-                onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                id="lokacija"
+                value={formData.lokacija}
+                onChange={(e) => setFormData({ ...formData, lokacija: e.target.value })}
+                placeholder="npr. Polica A1"
               />
             </div>
           </div>
@@ -129,6 +160,14 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="project">Projekat</Label>
+              <Input
+                id="project"
+                value={formData.project}
+                onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="input">Ulaz</Label>
               <Input
                 id="input"
@@ -138,6 +177,9 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                 onChange={(e) => setFormData({ ...formData, input: Number.parseInt(e.target.value) || 0 })}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="threshold">Prag Upozorenja</Label>
               <Input
@@ -153,6 +195,14 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
 
           <div className="border-t pt-4">
             <h4 className="font-medium mb-3">Okov</h4>
+            {hasPloceData && (
+              <Alert className="mb-3">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  Ne možete popuniti i Okov i Ploče polja istovremeno. Artikal može biti samo Okov ILI Ploče.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="okov_ime">Naziv</Label>
@@ -160,6 +210,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   id="okov_ime"
                   value={formData.okov_ime}
                   onChange={(e) => setFormData({ ...formData, okov_ime: e.target.value })}
+                  disabled={hasPloceData}
                 />
               </div>
               <div className="space-y-2">
@@ -170,6 +221,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   step="0.01"
                   value={formData.okov_cena}
                   onChange={(e) => setFormData({ ...formData, okov_cena: Number.parseFloat(e.target.value) || 0 })}
+                  disabled={hasPloceData}
                 />
               </div>
               <div className="space-y-2">
@@ -180,6 +232,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   step="1"
                   value={formData.okov_kom}
                   onChange={(e) => setFormData({ ...formData, okov_kom: Number.parseInt(e.target.value) || 0 })}
+                  disabled={hasPloceData}
                 />
               </div>
             </div>
@@ -187,6 +240,14 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
 
           <div className="border-t pt-4">
             <h4 className="font-medium mb-3">Ploče</h4>
+            {hasOkovData && (
+              <Alert className="mb-3">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  Ne možete popuniti i Okov i Ploče polja istovremeno. Artikal može biti samo Okov ILI Ploče.
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="ploce_ime">Naziv</Label>
@@ -194,6 +255,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   id="ploce_ime"
                   value={formData.ploce_ime}
                   onChange={(e) => setFormData({ ...formData, ploce_ime: e.target.value })}
+                  disabled={hasOkovData}
                 />
               </div>
               <div className="space-y-2">
@@ -204,6 +266,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   step="0.01"
                   value={formData.ploce_cena}
                   onChange={(e) => setFormData({ ...formData, ploce_cena: Number.parseFloat(e.target.value) || 0 })}
+                  disabled={hasOkovData}
                 />
               </div>
               <div className="space-y-2">
@@ -214,6 +277,7 @@ export function AddItemDialog({ open, onOpenChange, onAddItem }: AddItemDialogPr
                   step="1"
                   value={formData.ploce_kom}
                   onChange={(e) => setFormData({ ...formData, ploce_kom: Number.parseInt(e.target.value) || 0 })}
+                  disabled={hasOkovData}
                 />
               </div>
             </div>

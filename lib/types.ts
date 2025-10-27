@@ -10,6 +10,7 @@ export interface User {
 export interface Item {
   id: string
   code: string
+  lokacija?: string // Added location field
   project: string
   name: string
   supplier: string
@@ -68,6 +69,7 @@ export interface InputHistory {
 
 export interface ImportRow {
   code: string
+  lokacija?: string // Added location to import
   project: string
   name: string
   supplier: string
@@ -80,4 +82,15 @@ export interface ImportRow {
   ploce_cena?: number
   ploce_kom?: number
   low_stock_threshold?: number
+}
+
+export interface Project {
+  id: string
+  name: string
+  start_date: string // ISO date string
+  end_date: string // ISO date string
+  color: string // Added color field for project visualization
+  pdf_url?: string // URL to uploaded PDF document
+  created_at: string
+  updated_at: string
 }

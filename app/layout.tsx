@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ItemsProvider } from "@/contexts/items-context"
+import { ProjectsProvider } from "@/contexts/projects-context"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
@@ -25,10 +26,12 @@ export default function RootLayout({
     <html lang="sr">
       <body className={`font-sans antialiased`}>
         <AuthProvider>
-          <ItemsProvider>
-            {children}
-            <Toaster />
-          </ItemsProvider>
+          <ProjectsProvider>
+            <ItemsProvider>
+              {children}
+              <Toaster />
+            </ItemsProvider>
+          </ProjectsProvider>
         </AuthProvider>
         <Analytics />
       </body>

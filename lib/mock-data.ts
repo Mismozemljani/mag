@@ -1,4 +1,4 @@
-import type { User, Item, Reservation, Pickup, InputHistory } from "./types"
+import type { User, Item, Reservation, Pickup, InputHistory, Project } from "./types"
 
 // Mock users for demo
 export const mockUsers: User[] = [
@@ -15,18 +15,19 @@ export const mockItems: Item[] = [
   {
     id: "1",
     code: "WH-001",
+    lokacija: "Polica A1",
     project: "Projekat A",
     name: "Vijci M6x20",
-    supplier: "Dobavljač 1",
-    price: 0.5,
-    input: 1000,
+    supplier: "Dobavljač 3",
+    price: 0.55,
+    input: 1800,
     output: 100,
-    stock: 900,
+    stock: 1700,
     reserved: 50,
-    available: 850,
+    available: 1650,
     okov_ime: "Čelik",
-    okov_cena: 0.45,
-    okov_kom: 500,
+    okov_cena: 0.5,
+    okov_kom: 800,
     ploce_ime: "Aluminijum",
     ploce_cena: 2.5,
     ploce_kom: 100,
@@ -43,6 +44,7 @@ export const mockItems: Item[] = [
   {
     id: "2",
     code: "WH-002",
+    lokacija: "Polica A2",
     project: "Projekat A",
     name: "Matice M6",
     supplier: "Dobavljač 1",
@@ -62,6 +64,7 @@ export const mockItems: Item[] = [
   {
     id: "3",
     code: "WH-003",
+    lokacija: "Polica B1",
     project: "Projekat B",
     name: "Šrafovi M8x30",
     supplier: "Dobavljač 2",
@@ -85,27 +88,9 @@ export const mockItems: Item[] = [
     updated_at: new Date().toISOString(),
   },
   {
-    id: "4",
-    code: "WH-001",
-    project: "Projekat B",
-    name: "Vijci M6x20",
-    supplier: "Dobavljač 3",
-    price: 0.55,
-    input: 600,
-    output: 0,
-    stock: 600,
-    reserved: 0,
-    available: 600,
-    okov_ime: "Čelik",
-    okov_cena: 0.5,
-    okov_kom: 300,
-    low_stock_threshold: 100,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
     id: "5",
     code: "WH-004",
+    lokacija: "Polica C1",
     project: "Skladište",
     name: "Podloške 8mm",
     supplier: "Dobavljač 2",
@@ -125,6 +110,7 @@ export const mockItems: Item[] = [
   {
     id: "6",
     code: "WH-005",
+    lokacija: "Polica C2",
     project: "Skladište",
     name: "Kablovi 2.5mm",
     supplier: "Dobavljač 3",
@@ -147,6 +133,7 @@ export const mockItems: Item[] = [
   {
     id: "7",
     code: "WH-006",
+    lokacija: "Polica D1",
     project: "Projekat C",
     name: "Prekidači",
     supplier: "Dobavljač 3",
@@ -169,6 +156,7 @@ export const mockItems: Item[] = [
   {
     id: "8",
     code: "WH-007",
+    lokacija: "Polica D2",
     project: "Projekat D",
     name: "LED Sijalice",
     supplier: "Dobavljač 4",
@@ -250,7 +238,7 @@ export const mockInputHistory: InputHistory[] = [
   {
     id: "3",
     item_id: "1",
-    quantity: 500,
+    quantity: 200,
     price: 0.48,
     supplier: "Dobavljač 2",
     input_date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
@@ -258,17 +246,58 @@ export const mockInputHistory: InputHistory[] = [
   {
     id: "4",
     item_id: "1",
-    quantity: 300,
-    price: 0.52,
-    supplier: "Dobavljač 1",
-    input_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "5",
-    item_id: "4",
     quantity: 600,
     price: 0.55,
     supplier: "Dobavljač 3",
-    input_date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    input_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+// Mock projects with dates
+export const mockProjects: Project[] = [
+  {
+    id: "1",
+    name: "Projekat A",
+    start_date: "2024-01-15",
+    end_date: "2024-03-30",
+    color: "#3b82f6", // Added blue color
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    name: "Projekat B",
+    start_date: "2024-02-01",
+    end_date: "2024-04-15",
+    color: "#10b981", // Added green color
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    name: "Projekat C",
+    start_date: "2024-03-10",
+    end_date: "2024-05-20",
+    color: "#f59e0b", // Added orange color
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    name: "Projekat D",
+    start_date: "2024-04-01",
+    end_date: "2024-06-30",
+    color: "#8b5cf6", // Added purple color
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    name: "Skladište",
+    start_date: "2024-01-01",
+    end_date: "2024-12-31",
+    color: "#6b7280", // Added gray color
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ]

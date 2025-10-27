@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FileDown } from "lucide-react"
-import { mockInputHistory, mockItems } from "@/lib/mock-data"
+import { useItems } from "@/contexts/items-context"
 import type { InputHistory } from "@/lib/types"
 
 interface SupplierReportDialogProps {
@@ -16,10 +16,11 @@ interface SupplierReportDialogProps {
 }
 
 export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialogProps) {
+  const { items, inputHistory } = useItems()
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
 
-  const filteredHistory = mockInputHistory.filter((entry) => {
+  const filteredHistory = inputHistory.filter((entry) => {
     if (!startDate && !endDate) return true
     const entryDate = new Date(entry.input_date)
     const start = startDate ? new Date(startDate) : null
@@ -124,7 +125,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                 <tbody>
                   ${entries
                     .map((entry) => {
-                      const item = mockItems.find((i) => i.id === entry.item_id)
+                      const item = items.find((i) => i.id === entry.item_id)
                       return `
                     <tr>
                       <td>${new Date(entry.input_date).toLocaleDateString("sr-RS")}</td>
@@ -197,7 +198,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                     </TableHeader>
                     <TableBody>
                       {entries.map((entry) => {
-                        const item = mockItems.find((i) => i.id === entry.item_id)
+                        const item = items.find((i) => i.id === entry.item_id)
                         return (
                           <TableRow key={entry.id}>
                             <TableCell>{new Date(entry.input_date).toLocaleDateString("sr-RS")}</TableCell>
