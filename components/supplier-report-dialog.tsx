@@ -126,13 +126,16 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                   ${entries
                     .map((entry) => {
                       const item = items.find((i) => i.id === entry.item_id)
+                      const quantity = entry.quantity ?? 0
+                      const price = entry.price ?? 0
+                      const total = quantity * price
                       return `
                     <tr>
                       <td>${new Date(entry.input_date).toLocaleDateString("sr-RS")}</td>
                       <td>${item?.name || "N/A"} (${item?.code || "N/A"})</td>
-                      <td class="text-right">${entry.quantity.toFixed(2)}</td>
-                      <td class="text-right">${entry.price.toFixed(2)} RSD</td>
-                      <td class="text-right">${(entry.quantity * entry.price).toFixed(2)} RSD</td>
+                      <td class="text-right">${quantity.toFixed(2)}</td>
+                      <td class="text-right">${price.toFixed(2)} RSD</td>
+                      <td class="text-right">${total.toFixed(2)} RSD</td>
                     </tr>
                   `
                     })
@@ -199,17 +202,18 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                     <TableBody>
                       {entries.map((entry) => {
                         const item = items.find((i) => i.id === entry.item_id)
+                        const quantity = entry.quantity ?? 0
+                        const price = entry.price ?? 0
+                        const total = quantity * price
                         return (
                           <TableRow key={entry.id}>
                             <TableCell>{new Date(entry.input_date).toLocaleDateString("sr-RS")}</TableCell>
                             <TableCell>
                               {item?.name || "N/A"} ({item?.code || "N/A"})
                             </TableCell>
-                            <TableCell className="text-right">{entry.quantity.toFixed(2)}</TableCell>
-                            <TableCell className="text-right">{entry.price.toFixed(2)} RSD</TableCell>
-                            <TableCell className="text-right font-medium">
-                              {(entry.quantity * entry.price).toFixed(2)} RSD
-                            </TableCell>
+                            <TableCell className="text-right">{quantity.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{price.toFixed(2)} RSD</TableCell>
+                            <TableCell className="text-right font-medium">{total.toFixed(2)} RSD</TableCell>
                           </TableRow>
                         )
                       })}

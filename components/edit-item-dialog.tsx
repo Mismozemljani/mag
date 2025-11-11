@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 import type { Item } from "@/lib/types"
 
 interface EditItemDialogProps {
@@ -17,10 +19,30 @@ interface EditItemDialogProps {
 
 export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditItemDialogProps) {
   const [formData, setFormData] = useState(item)
+  const [hasOkovData, setHasOkovData] = useState(false)
+  const [hasPlоceData, setHasPlоceData] = useState(false)
 
   useEffect(() => {
     setFormData(item)
+    const hasOkov = !!(item.okov_ime || item.okov_cena || item.okov_kom)
+    const hasPloce = !!(item.ploce_ime || item.ploce_cena || item.ploce_kom)
+    setHasOkovData(hasOkov)
+    setHasPlоceData(hasPloce)
   }, [item])
+
+  useEffect(() => {
+    const hasOkov = !!(formData.okov_ime || formData.okov_cena || formData.okov_kom)
+    const hasPloce = !!(formData.ploce_ime || formData.ploce_cena || formData.ploce_kom)
+    setHasOkovData(hasOkov)
+    setHasPlоceData(hasPloce)
+  }, [
+    formData.okov_ime,
+    formData.okov_cena,
+    formData.okov_kom,
+    formData.ploce_ime,
+    formData.ploce_cena,
+    formData.ploce_kom,
+  ])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,8 +133,19 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
             </div>
           </div>
 
+          {hasOkovData && hasPlоceData && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Ne možete popuniti i Okov i Ploče rubriku istovremeno. Molimo ispraznite jednu od rubrika.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="border-t pt-4">
-            <h4 className="font-medium mb-3">Okov</h4>
+            <h4 className="font-medium mb-3">
+              Okov {hasPlоceData && <span className="text-red-500">(Blokirano)</span>}
+            </h4>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-okov_ime">Naziv</Label>
@@ -120,6 +153,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   id="edit-okov_ime"
                   value={formData.okov_ime || ""}
                   onChange={(e) => setFormData({ ...formData, okov_ime: e.target.value })}
+                  disabled={hasPlоceData}
                 />
               </div>
               <div className="space-y-2">
@@ -130,6 +164,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   step="0.01"
                   value={formData.okov_cena || 0}
                   onChange={(e) => setFormData({ ...formData, okov_cena: Number.parseFloat(e.target.value) || 0 })}
+                  disabled={hasPlоceData}
                 />
               </div>
               <div className="space-y-2">
@@ -140,13 +175,16 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   step="1"
                   value={formData.okov_kom || 0}
                   onChange={(e) => setFormData({ ...formData, okov_kom: Number.parseInt(e.target.value) || 0 })}
+                  disabled={hasPlоceData}
                 />
               </div>
             </div>
           </div>
 
           <div className="border-t pt-4">
-            <h4 className="font-medium mb-3">Ploče</h4>
+            <h4 className="font-medium mb-3">
+              Ploče {hasOkovData && <span className="text-red-500">(Blokirano)</span>}
+            </h4>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-ploce_ime">Naziv</Label>
@@ -154,6 +192,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   id="edit-ploce_ime"
                   value={formData.ploce_ime || ""}
                   onChange={(e) => setFormData({ ...formData, ploce_ime: e.target.value })}
+                  disabled={hasOkovData}
                 />
               </div>
               <div className="space-y-2">
@@ -164,6 +203,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   step="0.01"
                   value={formData.ploce_cena || 0}
                   onChange={(e) => setFormData({ ...formData, ploce_cena: Number.parseFloat(e.target.value) || 0 })}
+                  disabled={hasOkovData}
                 />
               </div>
               <div className="space-y-2">
@@ -174,6 +214,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
                   step="1"
                   value={formData.ploce_kom || 0}
                   onChange={(e) => setFormData({ ...formData, ploce_kom: Number.parseInt(e.target.value) || 0 })}
+                  disabled={hasOkovData}
                 />
               </div>
             </div>
@@ -183,7 +224,9 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Otkaži
             </Button>
-            <Button type="submit">Sačuvaj Izmene</Button>
+            <Button type="submit" disabled={hasOkovData && hasPlоceData}>
+              Sačuvaj Izmene
+            </Button>
           </div>
         </form>
       </DialogContent>

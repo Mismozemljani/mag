@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { BookmarkPlus, Package, RefreshCw } from "lucide-react"
+import { BookmarkPlus, Package, RefreshCw, Search } from "lucide-react"
 import { useItems } from "@/contexts/items-context"
+import { Input } from "@/components/ui/input"
 import type { Item } from "@/lib/types"
 
 export function ReservationDashboard() {
@@ -18,6 +19,16 @@ export function ReservationDashboard() {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false)
   const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredItems = items.filter((item) => {
+    const query = searchQuery.toLowerCase()
+    return (
+      item.code.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
+      item.project.toLowerCase().includes(query)
+    )
+  })
 
   const handleReserve = (itemId: string) => {
     const item = items.find((i) => i.id === itemId)
@@ -67,6 +78,18 @@ export function ReservationDashboard() {
                 Osveži
               </Button>
             </div>
+
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Pretraži artikle..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <Card>
               <CardContent className="p-6">
                 <div className="rounded-lg border bg-card overflow-hidden">
@@ -82,7 +105,7 @@ export function ReservationDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {items.map((item) => (
+                        {filteredItems.map((item) => (
                           <TableRow key={item.id}>
                             <TableCell className="font-mono font-medium">{item.code}</TableCell>
                             <TableCell className="font-medium">{item.name}</TableCell>

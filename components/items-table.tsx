@@ -61,6 +61,14 @@ export function ItemsTable({
     })
   }
 
+  // Helper function to safely render numeric values
+  const safeNumber = (value: number | undefined | null): number => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return 0
+    }
+    return value
+  }
+
   return (
     <>
       <div className="rounded-lg border bg-card overflow-hidden">
@@ -110,19 +118,19 @@ export function ItemsTable({
                   {isAdmin && <TableCell>{item.project}</TableCell>}
                   <TableCell className="font-medium">{item.name}</TableCell>
                   {isAdmin && <TableCell>{item.supplier}</TableCell>}
-                  <TableCell className="text-right">{item.price.toFixed(2)} RSD</TableCell>
+                  <TableCell className="text-right">{safeNumber(item.price).toFixed(2)} RSD</TableCell>
                   {isAdmin && (
                     <>
                       <TableCell>{item.okov_ime || "-"}</TableCell>
                       <TableCell className="text-right">
-                        {item.okov_cena ? `${item.okov_cena.toFixed(2)} RSD` : "-"}
+                        {item.okov_cena ? `${safeNumber(item.okov_cena).toFixed(2)} RSD` : "-"}
                       </TableCell>
-                      <TableCell className="text-right">{item.okov_kom || "-"}</TableCell>
+                      <TableCell className="text-right">{item.okov_kom ? safeNumber(item.okov_kom) : "-"}</TableCell>
                       <TableCell>{item.ploce_ime || "-"}</TableCell>
                       <TableCell className="text-right">
-                        {item.ploce_cena ? `${item.ploce_cena.toFixed(2)} RSD` : "-"}
+                        {item.ploce_cena ? `${safeNumber(item.ploce_cena).toFixed(2)} RSD` : "-"}
                       </TableCell>
-                      <TableCell className="text-right">{item.ploce_kom || "-"}</TableCell>
+                      <TableCell className="text-right">{item.ploce_kom ? safeNumber(item.ploce_kom) : "-"}</TableCell>
                     </>
                   )}
                   {!showLimitedColumns && (
@@ -135,7 +143,7 @@ export function ItemsTable({
                             className="p-0 h-auto font-normal"
                             onClick={() => setHistoryItem(item)}
                           >
-                            {item.input}
+                            {safeNumber(item.input)}
                           </Button>
                         </TableCell>
                       )}
@@ -148,18 +156,18 @@ export function ItemsTable({
                       className="p-0 h-auto font-normal"
                       onClick={() => setStockHistoryItem(item)}
                     >
-                      {item.stock}
+                      {safeNumber(item.stock)}
                     </Button>
                   </TableCell>
                   {!showLimitedColumns && (
                     <TableCell className="text-right">
-                      <Badge className={cn(getStockBadgeColor(item.available, item.low_stock_threshold))}>
-                        {item.available}
+                      <Badge className={cn(getStockBadgeColor(safeNumber(item.available), item.low_stock_threshold))}>
+                        {safeNumber(item.available)}
                       </Badge>
                     </TableCell>
                   )}
                   {!showLimitedColumns && (
-                    <>{isAdmin && <TableCell className="text-right">{item.reserved}</TableCell>}</>
+                    <>{isAdmin && <TableCell className="text-right">{safeNumber(item.reserved)}</TableCell>}</>
                   )}
                   {isAdmin && (
                     <>
@@ -167,9 +175,11 @@ export function ItemsTable({
                       <TableCell className="text-xs">{formatDateTime(item.vreme_rezervacije)}</TableCell>
                       <TableCell className="font-mono text-xs">{item.sifra_rezervacije || "-"}</TableCell>
                       <TableCell className="text-right">
-                        {pickups
-                          .filter((p) => p.item_id === item.id && p.confirmed_at)
-                          .reduce((sum, p) => sum + p.quantity, 0)}
+                        {safeNumber(
+                          pickups
+                            .filter((p) => p.item_id === item.id && p.confirmed_at)
+                            .reduce((sum, p) => sum + p.quantity, 0),
+                        )}
                       </TableCell>
                       <TableCell>{item.preuzeo || "-"}</TableCell>
                       <TableCell className="text-xs">{formatDateTime(item.vreme_preuzimanja)}</TableCell>

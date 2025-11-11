@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2 } from "lucide-react"
 import type { Project } from "@/lib/types"
 
 interface ProjectCalendarProps {
@@ -13,6 +13,7 @@ interface ProjectCalendarProps {
 
 export function ProjectCalendar({ projects, onClose }: ProjectCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const monthNames = [
     "Januar",
@@ -66,9 +67,9 @@ export function ProjectCalendar({ projects, onClose }: ProjectCalendarProps) {
             key={project.id}
             className="text-xs px-1 py-0.5 mb-1 rounded truncate"
             style={{
-              backgroundColor: project.color + "33", // Use project color with transparency
-              color: project.color, // Use project color for text
-              borderLeft: `3px solid ${project.color}`, // Add colored border
+              backgroundColor: project.color + "33",
+              color: project.color,
+              borderLeft: `3px solid ${project.color}`,
             }}
             title={`${project.name}\n${project.start_date} - ${project.end_date}`}
           >
@@ -80,12 +81,17 @@ export function ProjectCalendar({ projects, onClose }: ProjectCalendarProps) {
   }
 
   return (
-    <Card className="p-4">
+    <Card className={`p-4 ${isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""}`}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Kalendar Projekata</h3>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} title="Ceo ekran">
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center justify-between mb-4">

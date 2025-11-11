@@ -14,6 +14,7 @@ import { UserManagementDialog } from "@/components/user-management-dialog"
 import { ProjectManagementDialog } from "@/components/project-management-dialog"
 import { ProjectCalendar } from "@/components/project-calendar"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Plus,
   FileText,
@@ -26,6 +27,7 @@ import {
   MapPin,
   Calendar,
   FolderKanban,
+  Search,
 } from "lucide-react"
 import { useItems } from "@/contexts/items-context"
 import { useProjects } from "@/contexts/projects-context"
@@ -44,8 +46,20 @@ export function AdminDashboard() {
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false)
   const [isProjectManagementOpen, setIsProjectManagementOpen] = useState(false)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const projectNames = Array.from(new Set(items.map((item) => item.project).filter(Boolean)))
+
+  const filteredItems = items.filter((item) => {
+    const query = searchQuery.toLowerCase()
+    return (
+      item.code.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
+      item.project.toLowerCase().includes(query) ||
+      item.supplier.toLowerCase().includes(query) ||
+      (item.lokacija && item.lokacija.toLowerCase().includes(query))
+    )
+  })
 
   const handleAddItem = (newItem: Parameters<typeof addItem>[0]) => {
     addItem(newItem)
@@ -80,7 +94,6 @@ export function AdminDashboard() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Upravljanje Artiklima</h2>
-            <p className="text-muted-foreground">Pregled i upravljanje svim artiklima u magacinu</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={refreshAll} title="Osveži podatke">
@@ -132,6 +145,19 @@ export function AdminDashboard() {
           </div>
         </div>
 
+        <div className="mb-4">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Pretraži po šifri, nazivu, projektu..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {projectNames.length > 0 && (
           <div className="mb-6">
             <h3 className="text-sm font-medium mb-3">Brzi pristup projektima:</h3>
@@ -149,7 +175,7 @@ export function AdminDashboard() {
         <div className={isCalendarOpen ? "grid grid-rows-2 gap-4 h-[calc(100vh-300px)]" : ""}>
           <div className={isCalendarOpen ? "overflow-auto" : ""}>
             <ItemsTable
-              items={items}
+              items={filteredItems}
               inputHistory={inputHistory}
               reservations={reservations}
               pickups={pickups}

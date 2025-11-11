@@ -38,39 +38,67 @@ interface ItemsContextType {
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined)
 
 export function ItemsProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<Item[]>(mockItems)
-  const [reservations, setReservations] = useState<Reservation[]>(mockReservations)
-  const [pickups, setPickups] = useState<Pickup[]>(mockPickups)
-  const [inputHistory, setInputHistory] = useState<InputHistory[]>(mockInputHistory)
+  const [items, setItems] = useState<Item[]>([])
+  const [reservations, setReservations] = useState<Reservation[]>([])
+  const [pickups, setPickups] = useState<Pickup[]>([])
+  const [inputHistory, setInputHistory] = useState<InputHistory[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  useEffect(() => {
+    const loadedItems = localStorage.getItem("warehouse_items")
+    const loadedReservations = localStorage.getItem("warehouse_reservations")
+    const loadedPickups = localStorage.getItem("warehouse_pickups")
+    const loadedInputHistory = localStorage.getItem("warehouse_input_history")
+
+    setItems(loadedItems ? JSON.parse(loadedItems) : mockItems)
+    setReservations(loadedReservations ? JSON.parse(loadedReservations) : mockReservations)
+    setPickups(loadedPickups ? JSON.parse(loadedPickups) : mockPickups)
+    setInputHistory(loadedInputHistory ? JSON.parse(loadedInputHistory) : mockInputHistory)
+    setIsInitialized(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    localStorage.setItem("warehouse_items", JSON.stringify(items))
+  }, [items, isInitialized])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    localStorage.setItem("warehouse_reservations", JSON.stringify(reservations))
+  }, [reservations, isInitialized])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    localStorage.setItem("warehouse_pickups", JSON.stringify(pickups))
+  }, [pickups, isInitialized])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    localStorage.setItem("warehouse_input_history", JSON.stringify(inputHistory))
+  }, [inputHistory, isInitialized])
 
   const recalculateItemsByName = (itemName: string) => {
     setItems((currentItems) => {
-      // Find all items with the same name
       const itemsWithSameName = currentItems.filter((item) => item.name === itemName)
       const itemIds = itemsWithSameName.map((item) => item.id)
 
-      // Use the latest state from closures
       const latestInputHistory = inputHistory
       const latestReservations = reservations
       const latestPickups = pickups
 
-      // Calculate total input for all items with this name
       const totalInput = latestInputHistory
         .filter((h) => itemIds.includes(h.item_id))
         .reduce((sum, h) => sum + h.quantity, 0)
 
-      // Calculate total reserved for all items with this name
       const totalReserved = latestReservations
         .filter((r) => itemIds.includes(r.item_id))
         .reduce((sum, r) => sum + r.quantity, 0)
 
-      // Calculate total picked up (output) for all items with this name
       const totalOutput = latestPickups
         .filter((p) => itemIds.includes(p.item_id) && p.confirmed_at)
         .reduce((sum, p) => sum + p.quantity, 0)
 
-      // Get latest reservation and pickup info across all items with this name
       const latestReservation = latestReservations
         .filter((r) => itemIds.includes(r.item_id))
         .sort((a, b) => new Date(b.reserved_at).getTime() - new Date(a.reserved_at).getTime())[0]
@@ -79,34 +107,23 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
         .filter((p) => itemIds.includes(p.item_id) && p.confirmed_at)
         .sort((a, b) => new Date(b.picked_up_at).getTime() - new Date(a.picked_up_at).getTime())[0]
 
-      // Calculate shared stock and available
       const stock = totalInput - totalOutput
       const available = stock - totalReserved
 
-      console.log("[v0] Recalculating items with name:", itemName, {
-        totalInput,
-        totalOutput,
-        totalReserved,
-        stock,
-        available,
-      })
-
-      // Update all items with the same name to have the same stock values
       return currentItems.map((item) => {
         if (item.name !== itemName) return item
 
-        // Calculate individual input for this specific item
         const itemInput = latestInputHistory
           .filter((h) => h.item_id === item.id)
           .reduce((sum, h) => sum + h.quantity, 0)
 
         return {
           ...item,
-          input: itemInput, // Keep individual input
-          output: totalOutput, // Shared output
-          stock, // Shared stock
-          reserved: totalReserved, // Shared reserved
-          available, // Shared available
+          input: itemInput,
+          output: totalOutput,
+          stock,
+          reserved: totalReserved,
+          available,
           rezervisao: latestReservation?.reserved_by,
           vreme_rezervacije: latestReservation?.reserved_at,
           sifra_rezervacije: latestReservation?.reservation_code,
@@ -127,13 +144,12 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    console.log("[v0] Recalculating all items due to data change")
+    if (!isInitialized) return
     const uniqueNames = new Set(items.map((item) => item.name))
     uniqueNames.forEach((name) => recalculateItemsByName(name))
-  }, [reservations, pickups, inputHistory, refreshTrigger])
+  }, [reservations, pickups, inputHistory, refreshTrigger, isInitialized])
 
   const refreshAll = () => {
-    console.log("[v0] Manual refresh triggered")
     setRefreshTrigger((prev) => prev + 1)
   }
 
@@ -161,8 +177,6 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
     const existingItem = items.find((item) => item.code.trim() === trimmedCode && item.name.trim() === trimmedName)
 
     if (existingItem) {
-      console.log("[v0] Adding to existing item:", existingItem.id)
-      // Add to input history instead of creating new item
       const newHistory: InputHistory = {
         id: Math.random().toString(36).substr(2, 9),
         item_id: existingItem.id,
@@ -173,11 +187,9 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
       }
       setInputHistory((prev) => {
         const updated = [...prev, newHistory]
-        console.log("[v0] Updated inputHistory:", updated.length)
         return updated
       })
 
-      // Update the item's supplier and price to the latest
       setItems((prev) =>
         prev.map((item) =>
           item.id === existingItem.id
@@ -199,7 +211,6 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
         ),
       )
     } else {
-      console.log("[v0] Creating new item")
       const itemId = Math.random().toString(36).substr(2, 9)
       const item: Item = {
         ...newItem,
@@ -215,7 +226,6 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
       }
       setItems((prev) => [...prev, item])
 
-      // Add initial input history
       const newHistory: InputHistory = {
         id: Math.random().toString(36).substr(2, 9),
         item_id: itemId,
@@ -237,12 +247,10 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
         return item
       }),
     )
-    // Trigger refresh to recalculate
     setRefreshTrigger((prev) => prev + 1)
   }
 
   const deleteItem = (itemId: string) => {
-    const item = items.find((i) => i.id === itemId)
     setItems((prev) => prev.filter((item) => item.id !== itemId))
     setReservations((prev) => prev.filter((r) => r.item_id !== itemId))
     setPickups((prev) => prev.filter((p) => p.item_id !== itemId))

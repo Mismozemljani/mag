@@ -8,14 +8,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Package, RefreshCw } from "lucide-react"
+import { Package, RefreshCw, Search } from "lucide-react"
 import { useItems } from "@/contexts/items-context"
 import type { Item } from "@/lib/types"
+import { Input } from "@/components/ui/input"
 
 export function PickupDashboard() {
   const { items, pickups, addPickup, refresh } = useItems()
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredItems = items.filter((item) => {
+    const query = searchQuery.toLowerCase()
+    return (
+      item.code.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
+      item.project.toLowerCase().includes(query)
+    )
+  })
 
   const handlePickup = (itemId: string) => {
     const item = items.find((i) => i.id === itemId)
@@ -51,6 +62,18 @@ export function PickupDashboard() {
                 Osveži
               </Button>
             </div>
+
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Pretraži artikle..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <Card>
               <CardContent className="p-6">
                 <div className="rounded-lg border bg-card overflow-hidden">
@@ -65,7 +88,7 @@ export function PickupDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {items.map((item) => (
+                        {filteredItems.map((item) => (
                           <TableRow key={item.id}>
                             <TableCell className="font-mono font-medium">{item.code}</TableCell>
                             <TableCell className="font-medium">{item.name}</TableCell>

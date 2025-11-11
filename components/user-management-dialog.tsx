@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Trash2 } from "lucide-react"
 import { mockUsers } from "@/lib/mock-data"
@@ -18,6 +19,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
   const [users, setUsers] = useState(mockUsers)
   const [newUserName, setNewUserName] = useState("")
   const [newUserEmail, setNewUserEmail] = useState("")
+  const [newUserRole, setNewUserRole] = useState<"MAGACIN_ADMIN" | "REZERVACIJA" | "PREUZIMANJE">("REZERVACIJA")
 
   const handleAddUser = () => {
     if (!newUserName.trim()) return
@@ -26,12 +28,13 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
       id: Math.random().toString(36).substr(2, 9),
       name: newUserName,
       email: newUserEmail || `${newUserName.toLowerCase().replace(/\s+/g, ".")}@magacin.rs`,
-      role: "REZERVACIJA" as const,
+      role: newUserRole,
     }
 
     setUsers([...users, newUser])
     setNewUserName("")
     setNewUserEmail("")
+    setNewUserRole("REZERVACIJA")
 
     // Update mock data
     mockUsers.push(newUser)
@@ -45,21 +48,22 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
     }
   }
 
-  const reservationUsers = users.filter((u) => u.role === "REZERVACIJA" || u.role === "MAGACIN_ADMIN")
-  const pickupUsers = users.filter((u) => u.role === "PREUZIMANJE" || u.role === "MAGACIN_ADMIN")
+  const adminUsers = users.filter((u) => u.role === "MAGACIN_ADMIN")
+  const reservationUsers = users.filter((u) => u.role === "REZERVACIJA")
+  const pickupUsers = users.filter((u) => u.role === "PREUZIMANJE")
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Upravljanje Korisnicima</DialogTitle>
-          <DialogDescription>Dodajte ili uklonite korisnike za rezervacije i preuzimanja</DialogDescription>
+          <DialogDescription>Dodajte ili uklonite korisnike za sve uloge</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           <div className="border rounded-lg p-4">
             <h3 className="font-medium mb-4">Dodaj Novog Korisnika</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="userName">Ime i Prezime *</Label>
                 <Input
@@ -79,11 +83,50 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   placeholder="marko@magacin.rs"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="userRole">Uloga *</Label>
+                <Select value={newUserRole} onValueChange={(value: any) => setNewUserRole(value)}>
+                  <SelectTrigger id="userRole">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MAGACIN_ADMIN">Administrator</SelectItem>
+                    <SelectItem value="REZERVACIJA">Rezervacija</SelectItem>
+                    <SelectItem value="PREUZIMANJE">Preuzimanje</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Button onClick={handleAddUser} className="mt-4">
               <Plus className="h-4 w-4 mr-2" />
               Dodaj Korisnika
             </Button>
+          </div>
+
+          <div className="border rounded-lg p-4">
+            <h3 className="font-medium mb-4">Administratori</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ime</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead className="w-[100px]">Akcije</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {adminUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
 
           <div className="border rounded-lg p-4">
@@ -93,7 +136,6 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                 <TableRow>
                   <TableHead>Ime</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Uloga</TableHead>
                   <TableHead className="w-[100px]">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -102,13 +144,10 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
                     <TableCell>
-                      {user.role !== "MAGACIN_ADMIN" && (
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -123,7 +162,6 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                 <TableRow>
                   <TableHead>Ime</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Uloga</TableHead>
                   <TableHead className="w-[100px]">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -132,13 +170,10 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
                     <TableCell>
-                      {user.role !== "MAGACIN_ADMIN" && (
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
