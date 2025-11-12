@@ -209,7 +209,7 @@ export function AdminDashboard() {
         )}
 
         <div className={isCalendarOpen ? "grid grid-rows-2 gap-4 h-[calc(100vh-300px)]" : ""}>
-          <div className={isCalendarOpen ? "overflow-auto" : "max-h-[600px] overflow-auto"}>
+          <div className={isCalendarOpen ? "overflow-auto" : "max-h-[350px] overflow-auto"}>
             <ItemsTable
               items={filteredItems}
               inputHistory={inputHistory}
