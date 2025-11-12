@@ -8,7 +8,7 @@ export default function HomePage() {
         <div className="text-center space-y-2">
           <div className="flex justify-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/viber_slika_2025-10-27_13-16-13-555-BUrSBsf0txMwRCGr3clVTt8FlVJken.png"
+              src="/images/lumberline-logo.png"
               alt="Lumberline Logo"
               width={200}
               height={80}
@@ -16,7 +16,6 @@ export default function HomePage() {
               priority
             />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Magacin Sistem</h1>
           <p className="text-muted-foreground">Sistem za upravljanje magacinom</p>
         </div>
         <LoginForm />

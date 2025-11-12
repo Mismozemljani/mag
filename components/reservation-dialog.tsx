@@ -12,6 +12,11 @@ import { useAuth } from "@/contexts/auth-context"
 import { mockUsers } from "@/lib/mock-data"
 import type { Item, Reservation } from "@/lib/types"
 
+const safeNumber = (value: any): number => {
+  const num = Number(value)
+  return isNaN(num) || !isFinite(num) ? 0 : num
+}
+
 interface ReservationDialogProps {
   item: Item
   open: boolean
@@ -25,7 +30,8 @@ export function ReservationDialog({ item, open, onOpenChange, onAddReservation }
   const [reservedBy, setReservedBy] = useState(user?.name || "")
   const [notes, setNotes] = useState("")
 
-  const userNames = mockUsers.map((u) => u.name).sort()
+  const reservationUsers = mockUsers.filter((u) => u.role === "REZERVACIJA")
+  const userNames = reservationUsers.map((u) => u.name).sort()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,7 +52,7 @@ export function ReservationDialog({ item, open, onOpenChange, onAddReservation }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="resize">
         <DialogHeader>
           <DialogTitle>Rezervacija Artikla</DialogTitle>
           <DialogDescription>
@@ -56,7 +62,7 @@ export function ReservationDialog({ item, open, onOpenChange, onAddReservation }
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Dostupno</Label>
-            <div className="text-2xl font-bold">{item.available}</div>
+            <div className="text-2xl font-bold">{safeNumber(item.available)}</div>
           </div>
 
           <div className="space-y-2">

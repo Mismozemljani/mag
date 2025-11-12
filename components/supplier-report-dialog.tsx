@@ -51,6 +51,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8">
           <title>Izveštaj po dobavljačima</title>
           <style>
             body {
@@ -117,6 +118,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                   <tr>
                     <th>Datum</th>
                     <th>Artikal</th>
+                    <th>Lokacija</th>
                     <th class="text-right">Količina</th>
                     <th class="text-right">Cena</th>
                     <th class="text-right">Ukupno</th>
@@ -133,6 +135,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                     <tr>
                       <td>${new Date(entry.input_date).toLocaleDateString("sr-RS")}</td>
                       <td>${item?.name || "N/A"} (${item?.code || "N/A"})</td>
+                      <td>${item?.lokacija || "-"}</td>
                       <td class="text-right">${quantity.toFixed(2)}</td>
                       <td class="text-right">${price.toFixed(2)} RSD</td>
                       <td class="text-right">${total.toFixed(2)} RSD</td>
@@ -159,7 +162,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Izveštaj po dobavljačima</DialogTitle>
           <DialogDescription>Pregled ulaza po dobavljačima i datumima</DialogDescription>
@@ -188,12 +191,13 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
             {Object.entries(groupedBySupplier).map(([supplier, entries]) => (
               <div key={supplier} className="space-y-2">
                 <h3 className="text-lg font-semibold">{supplier}</h3>
-                <div className="rounded-lg border">
+                <div className="rounded-lg border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Datum</TableHead>
                         <TableHead>Artikal</TableHead>
+                        <TableHead>Lokacija</TableHead>
                         <TableHead className="text-right">Količina</TableHead>
                         <TableHead className="text-right">Cena</TableHead>
                         <TableHead className="text-right">Ukupno</TableHead>
@@ -211,6 +215,7 @@ export function SupplierReportDialog({ open, onOpenChange }: SupplierReportDialo
                             <TableCell>
                               {item?.name || "N/A"} ({item?.code || "N/A"})
                             </TableCell>
+                            <TableCell>{item?.lokacija || "-"}</TableCell>
                             <TableCell className="text-right">{quantity.toFixed(2)}</TableCell>
                             <TableCell className="text-right">{price.toFixed(2)} RSD</TableCell>
                             <TableCell className="text-right font-medium">{total.toFixed(2)} RSD</TableCell>

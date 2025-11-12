@@ -5,6 +5,7 @@ export interface User {
   name: string
   email: string
   role: UserRole
+  userCode?: string // Added unique user code for authentication
 }
 
 export interface Item {
@@ -90,6 +91,7 @@ export interface Project {
   start_date: string // ISO date string
   end_date: string // ISO date string
   color: string // Added color field for project visualization
+  pdf_document?: string // Added PDF document name
   pdf_url?: string // URL to uploaded PDF document
   created_at: string
   updated_at: string

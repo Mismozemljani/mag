@@ -89,7 +89,7 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
           const lowerHeader = header.toLowerCase()
           if (lowerHeader.includes("šifra") || lowerHeader.includes("sifra") || lowerHeader === "code") {
             autoMapping[`col_${index}`] = "code"
-          } else if (lowerHeader.includes("naziv") || lowerHeader === "name") {
+          } else if (lowerHeader.includes("naziv") || lowerHeader === "name" || lowerHeader.includes("materijal")) {
             autoMapping[`col_${index}`] = "name"
           } else if (lowerHeader.includes("projekat") || lowerHeader === "project") {
             autoMapping[`col_${index}`] = "project"
@@ -103,7 +103,12 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
             autoMapping[`col_${index}`] = "supplier"
           } else if (lowerHeader.includes("cena") && !lowerHeader.includes("okov") && !lowerHeader.includes("plo")) {
             autoMapping[`col_${index}`] = "price"
-          } else if (lowerHeader.includes("ulaz") || lowerHeader === "input") {
+          } else if (
+            lowerHeader.includes("ulaz") ||
+            lowerHeader === "input" ||
+            lowerHeader.includes("količina") ||
+            lowerHeader.includes("kolicina")
+          ) {
             autoMapping[`col_${index}`] = "input"
           } else if (lowerHeader.includes("okov") && lowerHeader.includes("ime")) {
             autoMapping[`col_${index}`] = "okov_ime"
@@ -172,7 +177,11 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
           else if (sysKey === "ploce_kom") mappedRow.ploce_kom = Number.parseInt(String(value || "0")) || 0
         })
 
-        if (mappedRow.code && mappedRow.name) {
+        if (mappedRow.name) {
+          // Generate code if not provided
+          if (!mappedRow.code) {
+            mappedRow.code = `AUTO-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+          }
           rows.push(mappedRow as ImportRow)
         }
       }
@@ -199,13 +208,20 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
     onOpenChange(false)
   }
 
+  const safeNumber = (value: number | undefined | null): string => {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return "0.00"
+    }
+    return value.toFixed(2)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Uvoz iz Excel/CSV</DialogTitle>
           <DialogDescription>
-            Učitajte CSV ili Excel fajl (sačuvan kao CSV) sa kolonama: šifra, projekat, naziv, dobavljač, cena, ulaz
+            Učitajte .xlsx, .ods, ili .csv fajl sa kolonama: šifra, projekat, naziv, dobavljač, cena, ulaz
           </DialogDescription>
         </DialogHeader>
 
@@ -222,7 +238,7 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
             <input
               id="file-upload"
               type="file"
-              accept=".csv,.xlsx,.xls,.ods"
+              accept=".csv,.xlsx,.xls,.xlsb,.ods,.xltx,.xltm"
               className="hidden"
               onChange={handleFileUpload}
             />
@@ -241,15 +257,17 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
                 <TableIcon className="h-4 w-4" />
                 Mapiranje Kolona
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {fileHeaders.map((header, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Label className="min-w-[120px] text-sm">{header}</Label>
+                  <div key={index} className="flex flex-col gap-2">
+                    <Label className="text-sm font-medium truncate" title={header}>
+                      {header}
+                    </Label>
                     <Select
                       value={columnMapping[`col_${index}`] || ""}
                       onValueChange={(value) => setColumnMapping({ ...columnMapping, [`col_${index}`]: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Izaberite kolonu" />
                       </SelectTrigger>
                       <SelectContent>
@@ -288,9 +306,9 @@ export function ImportDialog({ open, onOpenChange, onImport }: ImportDialogProps
                       <TableRow key={i}>
                         <TableCell className="font-mono">{row.code}</TableCell>
                         <TableCell>{row.name}</TableCell>
-                        <TableCell>{row.supplier}</TableCell>
-                        <TableCell className="text-right">{row.price.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">{row.input}</TableCell>
+                        <TableCell>{row.supplier || "-"}</TableCell>
+                        <TableCell className="text-right">{safeNumber(row.price)}</TableCell>
+                        <TableCell className="text-right">{row.input || 0}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

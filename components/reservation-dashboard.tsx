@@ -21,6 +21,14 @@ export function ReservationDashboard() {
   const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
+  const safeNumber = (value: any, decimals = 0): string => {
+    const num = Number(value)
+    if (isNaN(num) || value === null || value === undefined) {
+      return decimals > 0 ? "0." + "0".repeat(decimals) : "0"
+    }
+    return decimals > 0 ? num.toFixed(decimals) : num.toString()
+  }
+
   const filteredItems = items.filter((item) => {
     const query = searchQuery.toLowerCase()
     return (
@@ -109,8 +117,8 @@ export function ReservationDashboard() {
                           <TableRow key={item.id}>
                             <TableCell className="font-mono font-medium">{item.code}</TableCell>
                             <TableCell className="font-medium">{item.name}</TableCell>
-                            <TableCell className="text-right">{item.price.toFixed(2)} RSD</TableCell>
-                            <TableCell className="text-right">{item.stock}</TableCell>
+                            <TableCell className="text-right">{safeNumber(item.price, 2)} RSD</TableCell>
+                            <TableCell className="text-right">{safeNumber(item.stock)}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
                                 <Button variant="outline" size="sm" onClick={() => handleReserve(item.id)}>
@@ -172,7 +180,7 @@ export function ReservationDashboard() {
                             <TableRow key={reservation.id}>
                               <TableCell className="font-medium">{item?.name}</TableCell>
                               <TableCell className="font-mono">{item?.code}</TableCell>
-                              <TableCell className="text-right">{reservation.quantity}</TableCell>
+                              <TableCell className="text-right">{safeNumber(reservation.quantity)}</TableCell>
                               <TableCell>{reservation.reserved_by}</TableCell>
                               <TableCell>{new Date(reservation.reserved_at).toLocaleString("sr-RS")}</TableCell>
                               <TableCell>
@@ -228,7 +236,7 @@ export function ReservationDashboard() {
                             <TableRow key={pickup.id}>
                               <TableCell className="font-medium">{item?.name}</TableCell>
                               <TableCell className="font-mono">{item?.code}</TableCell>
-                              <TableCell className="text-right">{pickup.quantity}</TableCell>
+                              <TableCell className="text-right">{safeNumber(pickup.quantity)}</TableCell>
                               <TableCell>{pickup.picked_up_by}</TableCell>
                               <TableCell>{new Date(pickup.picked_up_at).toLocaleString("sr-RS")}</TableCell>
                               <TableCell>

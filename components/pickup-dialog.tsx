@@ -14,6 +14,11 @@ import { useAuth } from "@/contexts/auth-context"
 import { mockUsers } from "@/lib/mock-data"
 import type { Item, Pickup } from "@/lib/types"
 
+const safeNumber = (value: any): number => {
+  const num = Number(value)
+  return isNaN(num) || !isFinite(num) ? 0 : num
+}
+
 interface PickupDialogProps {
   item: Item
   open: boolean
@@ -29,7 +34,8 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
   const [notes, setNotes] = useState("")
   const [codeError, setCodeError] = useState("")
 
-  const userNames = mockUsers.map((u) => u.name).sort()
+  const pickupUsers = mockUsers.filter((u) => u.role === "PREUZIMANJE")
+  const userNames = pickupUsers.map((u) => u.name).sort()
 
   const handleCodeChange = (value: string) => {
     setConfirmationCode(value)
@@ -48,9 +54,25 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
       return
     }
 
+    const selectedUser = pickupUsers.find((u) => u.name === pickedUpBy)
+    if (!selectedUser) {
+      setCodeError("Morate izabrati korisnika")
+      return
+    }
+
+    if (!selectedUser.userCode) {
+      setCodeError("Odabrani korisnik nema dodeljenu šifru")
+      return
+    }
+
+    if (confirmationCode.toUpperCase() !== selectedUser.userCode.toUpperCase()) {
+      setCodeError(`Pogrešna šifra. Možete koristiti samo svoju dodeljenu šifru: ${selectedUser.userCode}`)
+      return
+    }
+
     onAddPickup({
       item_id: item.id,
-      quantity: Number.parseFloat(quantity),
+      quantity: safeNumber(quantity),
       picked_up_by: pickedUpBy,
       confirmation_code: confirmationCode || undefined,
       notes: notes || undefined,
@@ -66,7 +88,7 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="resize">
         <DialogHeader>
           <DialogTitle>Preuzimanje Artikla</DialogTitle>
           <DialogDescription>
@@ -76,7 +98,7 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Dostupno na stanju</Label>
-            <div className="text-2xl font-bold">{item.stock.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{safeNumber(item.stock).toFixed(2)}</div>
           </div>
 
           <div className="space-y-2">
@@ -84,7 +106,7 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
             <Input
               id="pickup-quantity"
               type="number"
-              step="0.01"
+              step="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
@@ -125,7 +147,7 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
                 <AlertDescription>{codeError}</AlertDescription>
               </Alert>
             )}
-            {isCodeValid && (
+            {isCodeValid && !codeError && (
               <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-600">

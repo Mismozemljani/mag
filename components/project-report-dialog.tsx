@@ -5,6 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FileDown } from "lucide-react"
 import type { Item } from "@/lib/types"
 
+const safeNumber = (value: any): number => {
+  const num = Number(value)
+  return isNaN(num) || !isFinite(num) ? 0 : num
+}
+
 interface ProjectReportDialogProps {
   project: string
   items: Item[]
@@ -29,6 +34,7 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
             body {
               font-family: Arial, sans-serif;
               padding: 20px;
+              max-width: 100%;
             }
             h1 {
               color: #333;
@@ -47,6 +53,7 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
               border: 1px solid #ddd;
               padding: 12px;
               text-align: left;
+              font-size: 12px;
             }
             th {
               background-color: #f4f4f4;
@@ -59,6 +66,9 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
               text-align: right;
             }
             @media print {
+              body {
+                padding: 10px;
+              }
               button {
                 display: none;
               }
@@ -75,6 +85,7 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
             <thead>
               <tr>
                 <th>Šifra</th>
+                <th>Lokacija</th>
                 <th>Naziv</th>
                 <th>Dobavljač</th>
                 <th class="text-right">Cena</th>
@@ -91,14 +102,15 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
                   (item) => `
                 <tr>
                   <td>${item.code}</td>
+                  <td>${item.lokacija || "-"}</td>
                   <td>${item.name}</td>
                   <td>${item.supplier}</td>
-                  <td class="text-right">${item.price.toFixed(2)} RSD</td>
-                  <td class="text-right">${item.input.toFixed(2)}</td>
-                  <td class="text-right">${item.output.toFixed(2)}</td>
-                  <td class="text-right">${item.stock.toFixed(2)}</td>
-                  <td class="text-right">${item.reserved.toFixed(2)}</td>
-                  <td class="text-right">${item.available.toFixed(2)}</td>
+                  <td class="text-right">${safeNumber(item.price).toFixed(2)} RSD</td>
+                  <td class="text-right">${safeNumber(item.input).toFixed(2)}</td>
+                  <td class="text-right">${safeNumber(item.output).toFixed(2)}</td>
+                  <td class="text-right">${safeNumber(item.stock).toFixed(2)}</td>
+                  <td class="text-right">${safeNumber(item.reserved).toFixed(2)}</td>
+                  <td class="text-right">${safeNumber(item.available).toFixed(2)}</td>
                 </tr>
               `,
                 )
@@ -118,7 +130,7 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Izveštaj za projekat: {project}</DialogTitle>
           <DialogDescription>Pregled svih artikala i njihovih pozicija u magacinu</DialogDescription>
@@ -138,6 +150,7 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
               <TableHeader>
                 <TableRow>
                   <TableHead>Šifra</TableHead>
+                  <TableHead>Lokacija</TableHead>
                   <TableHead>Naziv</TableHead>
                   <TableHead>Dobavljač</TableHead>
                   <TableHead className="text-right">Cena</TableHead>
@@ -152,14 +165,15 @@ export function ProjectReportDialog({ project, items, open, onOpenChange }: Proj
                 {projectItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-mono">{item.code}</TableCell>
+                    <TableCell>{item.lokacija || "-"}</TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.supplier}</TableCell>
-                    <TableCell className="text-right">{item.price.toFixed(2)} RSD</TableCell>
-                    <TableCell className="text-right">{item.input.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{item.output.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{item.stock.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{item.reserved.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{item.available.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.price).toFixed(2)} RSD</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.input).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.output).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.stock).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.reserved).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{safeNumber(item.available).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

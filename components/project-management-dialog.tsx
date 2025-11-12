@@ -24,7 +24,7 @@ export function ProjectManagementDialog({ open, onOpenChange }: ProjectManagemen
     name: "",
     start_date: "",
     end_date: "",
-    color: "#3b82f6", // Added default color
+    color: "#3b82f6",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ export function ProjectManagementDialog({ open, onOpenChange }: ProjectManagemen
     } else {
       addProject(formData)
     }
-    setFormData({ name: "", start_date: "", end_date: "", color: "#3b82f6" }) // Reset with default color
+    setFormData({ name: "", start_date: "", end_date: "", color: "#3b82f6" })
   }
 
   const handleEdit = (project: Project) => {
@@ -44,29 +44,30 @@ export function ProjectManagementDialog({ open, onOpenChange }: ProjectManagemen
       name: project.name,
       start_date: project.start_date,
       end_date: project.end_date,
-      color: project.color, // Include color in edit
+      color: project.color,
     })
   }
 
   const handlePdfUpload = (projectId: string, file: File) => {
-    // Create a blob URL for the uploaded file
-    const pdfUrl = URL.createObjectURL(file)
-    updateProject(projectId, { pdf_url: pdfUrl })
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const result = e.target?.result
+      if (result) {
+        updateProject(projectId, {
+          pdf_url: result as string,
+          pdf_document: file.name,
+        })
+      }
+    }
+    reader.readAsDataURL(file)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Upravljanje Projektima</DialogTitle>
         </DialogHeader>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-          <p className="text-sm text-blue-900">
-            <strong>Napomena:</strong> Možete uneti sopstvene datume početka i završetka za svaki projekat. Kliknite na
-            polje datuma da izaberete datum iz kalendara ili unesite ručno.
-          </p>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           <div className="grid grid-cols-4 gap-4">
@@ -183,12 +184,15 @@ export function ProjectManagementDialog({ open, onOpenChange }: ProjectManagemen
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {project.pdf_url ? (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={project.pdf_url} target="_blank" rel="noopener noreferrer">
-                          <FileText className="h-4 w-4 mr-2" />
-                          Pregled
-                        </a>
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={project.pdf_url} target="_blank" rel="noopener noreferrer">
+                            <FileText className="h-4 w-4 mr-2" />
+                            Pregled
+                          </a>
+                        </Button>
+                        <span className="text-sm text-muted-foreground">{project.pdf_document}</span>
+                      </div>
                     ) : (
                       <Label htmlFor={`pdf-${project.id}`} className="cursor-pointer">
                         <Button variant="outline" size="sm" asChild>

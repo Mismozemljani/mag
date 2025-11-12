@@ -6,6 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useItems } from "@/contexts/items-context"
 import { FileDown } from "lucide-react"
 
+const safeNumber = (value: any): number => {
+  const num = Number(value)
+  return isNaN(num) || !isFinite(num) ? 0 : num
+}
+
 interface LocationReportDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -29,11 +34,11 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
 
   // Calculate totals for each location
   const locationGroups = Object.entries(itemsByLocation).map(([location, groupItems]) => {
-    const totalStock = groupItems.reduce((sum, item) => sum + item.stock, 0)
-    const totalReserved = groupItems.reduce((sum, item) => sum + item.reserved, 0)
-    const totalAvailable = groupItems.reduce((sum, item) => sum + item.available, 0)
-    const totalInput = groupItems.reduce((sum, item) => sum + item.input, 0)
-    const totalValue = groupItems.reduce((sum, item) => sum + item.stock * item.price, 0)
+    const totalStock = groupItems.reduce((sum, item) => sum + safeNumber(item.stock), 0)
+    const totalReserved = groupItems.reduce((sum, item) => sum + safeNumber(item.reserved), 0)
+    const totalAvailable = groupItems.reduce((sum, item) => sum + safeNumber(item.available), 0)
+    const totalInput = groupItems.reduce((sum, item) => sum + safeNumber(item.input), 0)
+    const totalValue = groupItems.reduce((sum, item) => sum + safeNumber(item.stock) * safeNumber(item.price), 0)
     const itemCount = groupItems.length
 
     return {
@@ -128,7 +133,7 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
                 <strong>Ukupno stanje:</strong> ${group.totalStock} | 
                 <strong>Rezervisano:</strong> ${group.totalReserved} | 
                 <strong>Dostupno:</strong> ${group.totalAvailable} | 
-                <strong>Ukupna vrednost:</strong> ${group.totalValue.toFixed(2)} RSD
+                <strong>Ukupna vrednost:</strong> ${safeNumber(group.totalValue).toFixed(2)} RSD
               </div>
               <table>
                 <thead>
@@ -151,11 +156,11 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
                       <td>${item.code}</td>
                       <td>${item.name}</td>
                       <td>${item.project}</td>
-                      <td class="text-right">${item.stock}</td>
-                      <td class="text-right">${item.reserved}</td>
-                      <td class="text-right">${item.available}</td>
-                      <td class="text-right">${item.price.toFixed(2)} RSD</td>
-                      <td class="text-right">${(item.stock * item.price).toFixed(2)} RSD</td>
+                      <td class="text-right">${safeNumber(item.stock)}</td>
+                      <td class="text-right">${safeNumber(item.reserved)}</td>
+                      <td class="text-right">${safeNumber(item.available)}</td>
+                      <td class="text-right">${safeNumber(item.price).toFixed(2)} RSD</td>
+                      <td class="text-right">${(safeNumber(item.stock) * safeNumber(item.price)).toFixed(2)} RSD</td>
                     </tr>
                   `,
                     )
@@ -179,7 +184,7 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Izveštaj po Lokaciji</DialogTitle>
           <DialogDescription>Pregled artikala grupisanih po lokaciji u magacinu</DialogDescription>
@@ -213,7 +218,7 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
                   <span className="font-medium">Ukupan Ulaz:</span> {group.totalInput}
                 </div>
                 <div>
-                  <span className="font-medium">Ukupna Vrednost:</span> {group.totalValue.toFixed(2)} RSD
+                  <span className="font-medium">Ukupna Vrednost:</span> {safeNumber(group.totalValue).toFixed(2)} RSD
                 </div>
               </div>
 
@@ -236,12 +241,12 @@ export function LocationReportDialog({ open, onOpenChange }: LocationReportDialo
                       <TableCell>{item.code}</TableCell>
                       <TableCell>{item.name}</TableCell>
                       <TableCell>{item.project}</TableCell>
-                      <TableCell className="text-right">{item.stock}</TableCell>
-                      <TableCell className="text-right">{item.reserved}</TableCell>
-                      <TableCell className="text-right">{item.available}</TableCell>
-                      <TableCell className="text-right">{item.price.toFixed(2)} RSD</TableCell>
+                      <TableCell className="text-right">{safeNumber(item.stock)}</TableCell>
+                      <TableCell className="text-right">{safeNumber(item.reserved)}</TableCell>
+                      <TableCell className="text-right">{safeNumber(item.available)}</TableCell>
+                      <TableCell className="text-right">{safeNumber(item.price).toFixed(2)} RSD</TableCell>
                       <TableCell className="text-right font-medium">
-                        {(item.stock * item.price).toFixed(2)} RSD
+                        {(safeNumber(item.stock) * safeNumber(item.price)).toFixed(2)} RSD
                       </TableCell>
                     </TableRow>
                   ))}

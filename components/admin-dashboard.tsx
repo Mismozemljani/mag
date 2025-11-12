@@ -13,6 +13,7 @@ import { LocationReportDialog } from "@/components/location-report-dialog"
 import { UserManagementDialog } from "@/components/user-management-dialog"
 import { ProjectManagementDialog } from "@/components/project-management-dialog"
 import { ProjectCalendar } from "@/components/project-calendar"
+import { PdfViewerDialog } from "@/components/pdf-viewer-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -31,7 +32,7 @@ import {
 } from "lucide-react"
 import { useItems } from "@/contexts/items-context"
 import { useProjects } from "@/contexts/projects-context"
-import type { ImportRow } from "@/lib/types"
+import type { ImportRow, Project } from "@/lib/types"
 
 export function AdminDashboard() {
   const { items, inputHistory, reservations, pickups, addItem, updateItem, deleteItem, refreshAll } = useItems()
@@ -47,16 +48,21 @@ export function AdminDashboard() {
   const [isProjectManagementOpen, setIsProjectManagementOpen] = useState(false)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [pdfViewerState, setPdfViewerState] = useState<{ open: boolean; url: string; title: string }>({
+    open: false,
+    url: "",
+    title: "",
+  })
 
   const projectNames = Array.from(new Set(items.map((item) => item.project).filter(Boolean)))
 
   const filteredItems = items.filter((item) => {
     const query = searchQuery.toLowerCase()
     return (
-      item.code.toLowerCase().includes(query) ||
-      item.name.toLowerCase().includes(query) ||
-      item.project.toLowerCase().includes(query) ||
-      item.supplier.toLowerCase().includes(query) ||
+      (item.code && item.code.toLowerCase().includes(query)) ||
+      (item.name && item.name.toLowerCase().includes(query)) ||
+      (item.project && item.project.toLowerCase().includes(query)) ||
+      (item.supplier && item.supplier.toLowerCase().includes(query)) ||
       (item.lokacija && item.lokacija.toLowerCase().includes(query))
     )
   })
@@ -87,14 +93,29 @@ export function AdminDashboard() {
     })
   }
 
+  const handleViewPdf = (projectNameOrObj: string | Project) => {
+    let project: Project | undefined
+
+    if (typeof projectNameOrObj === "string") {
+      project = projects.find((p) => p.name === projectNameOrObj)
+    } else {
+      project = projectNameOrObj
+    }
+
+    if (project?.pdf_url) {
+      setPdfViewerState({
+        open: true,
+        url: project.pdf_url,
+        title: `${project.name} - ${project.pdf_document || "PDF Dokument"}`,
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Upravljanje Artiklima</h2>
-          </div>
+        <div className="flex items-center justify-end mb-6">
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={refreshAll} title="Osveži podatke">
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -128,7 +149,7 @@ export function AdminDashboard() {
               <TrendingUp className="h-4 w-4 mr-2" />
               Izveštaj po Dobavljačima
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="ghost" asChild>
               <a href="/primer-magacin-import.csv" download="primer-magacin-import.csv">
                 <FileText className="h-4 w-4 mr-2" />
                 Preuzmi Primer
@@ -162,18 +183,33 @@ export function AdminDashboard() {
           <div className="mb-6">
             <h3 className="text-sm font-medium mb-3">Brzi pristup projektima:</h3>
             <div className="flex flex-wrap gap-2">
-              {projectNames.map((project) => (
-                <Button key={project} variant="outline" size="sm" onClick={() => setSelectedProject(project)}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  {project}
-                </Button>
-              ))}
+              {projectNames.map((projectName) => {
+                const project = projects.find((p) => p.name === projectName)
+                return (
+                  <div key={projectName} className="flex gap-1">
+                    <Button variant="outline" size="sm" onClick={() => setSelectedProject(projectName)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      {projectName}
+                    </Button>
+                    {project?.pdf_url && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewPdf(project)}
+                        title={`Pregled ${project.pdf_document || "PDF"}`}
+                      >
+                        <FileText className="h-4 w-4 text-red-600" />
+                      </Button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
 
         <div className={isCalendarOpen ? "grid grid-rows-2 gap-4 h-[calc(100vh-300px)]" : ""}>
-          <div className={isCalendarOpen ? "overflow-auto" : ""}>
+          <div className={isCalendarOpen ? "overflow-auto" : "max-h-[600px] overflow-auto"}>
             <ItemsTable
               items={filteredItems}
               inputHistory={inputHistory}
@@ -186,7 +222,7 @@ export function AdminDashboard() {
           </div>
           {isCalendarOpen && (
             <div className="overflow-auto">
-              <ProjectCalendar projects={projects} onClose={() => setIsCalendarOpen(false)} />
+              <ProjectCalendar projects={projects} onClose={() => setIsCalendarOpen(false)} onViewPdf={handleViewPdf} />
             </div>
           )}
         </div>
@@ -208,6 +244,12 @@ export function AdminDashboard() {
         <LocationReportDialog open={isLocationReportOpen} onOpenChange={setIsLocationReportOpen} />
         <UserManagementDialog open={isUserManagementOpen} onOpenChange={setIsUserManagementOpen} />
         <ProjectManagementDialog open={isProjectManagementOpen} onOpenChange={setIsProjectManagementOpen} />
+        <PdfViewerDialog
+          open={pdfViewerState.open}
+          onOpenChange={(open) => setPdfViewerState({ ...pdfViewerState, open })}
+          pdfUrl={pdfViewerState.url}
+          title={pdfViewerState.title}
+        />
       </main>
     </div>
   )

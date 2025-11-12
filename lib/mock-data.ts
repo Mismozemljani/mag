@@ -2,13 +2,14 @@ import type { User, Item, Reservation, Pickup, InputHistory, Project } from "./t
 
 // Mock users for demo
 export const mockUsers: User[] = [
-  { id: "1", name: "Admin Korisnik", email: "admin@magacin.rs", role: "MAGACIN_ADMIN" },
-  { id: "2", name: "Rezervacija Korisnik", email: "rezervacija@magacin.rs", role: "REZERVACIJA" },
-  { id: "3", name: "Preuzimanje Korisnik", email: "preuzimanje@magacin.rs", role: "PREUZIMANJE" },
-  { id: "4", name: "Marko Marković", email: "marko@magacin.rs", role: "REZERVACIJA" },
-  { id: "5", name: "Ana Anić", email: "ana@magacin.rs", role: "PREUZIMANJE" },
-  { id: "6", name: "Petar Petrović", email: "petar@magacin.rs", role: "REZERVACIJA" },
-  { id: "7", name: "Jovana Jovanović", email: "jovana@magacin.rs", role: "PREUZIMANJE" },
+  { id: "1", name: "Admin Korisnik", email: "admin@magacin.rs", role: "MAGACIN_ADMIN", userCode: "ADMIN1" },
+  { id: "2", name: "Rezervacija Korisnik", email: "rezervacija@magacin.rs", role: "REZERVACIJA", userCode: "REZ001" },
+  { id: "3", name: "Preuzimanje Korisnik", email: "preuzimanje@magacin.rs", role: "PREUZIMANJE", userCode: "PRE001" },
+  { id: "4", name: "Marko Marković", email: "marko@magacin.rs", role: "REZERVACIJA", userCode: "MARKO1" },
+  { id: "5", name: "Ana Anić", email: "ana@magacin.rs", role: "PREUZIMANJE", userCode: "ANA123" },
+  { id: "6", name: "Petar Petrović", email: "petar@magacin.rs", role: "REZERVACIJA", userCode: "PETAR1" },
+  { id: "7", name: "Jovana Jovanović", email: "jovana@magacin.rs", role: "PREUZIMANJE", userCode: "JOVAN1" },
+  { id: "8", name: "Stefan Nastasić", email: "stefan.nastasic@magacin.rs", role: "REZERVACIJA", userCode: "STEFAN1" },
 ]
 
 export const mockItems: Item[] = [
@@ -260,7 +261,7 @@ export const mockProjects: Project[] = [
     name: "Projekat A",
     start_date: "2024-01-15",
     end_date: "2024-03-30",
-    color: "#3b82f6", // Added blue color
+    color: "#3b82f6",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -269,7 +270,7 @@ export const mockProjects: Project[] = [
     name: "Projekat B",
     start_date: "2024-02-01",
     end_date: "2024-04-15",
-    color: "#10b981", // Added green color
+    color: "#10b981",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -278,7 +279,7 @@ export const mockProjects: Project[] = [
     name: "Projekat C",
     start_date: "2024-03-10",
     end_date: "2024-05-20",
-    color: "#f59e0b", // Added orange color
+    color: "#f59e0b",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -287,7 +288,7 @@ export const mockProjects: Project[] = [
     name: "Projekat D",
     start_date: "2024-04-01",
     end_date: "2024-06-30",
-    color: "#8b5cf6", // Added purple color
+    color: "#8b5cf6",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -296,7 +297,16 @@ export const mockProjects: Project[] = [
     name: "Skladište",
     start_date: "2024-01-01",
     end_date: "2024-12-31",
-    color: "#6b7280", // Added gray color
+    color: "#6b7280",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "6",
+    name: "Kuhinja Marković",
+    start_date: "2025-11-12",
+    end_date: "2025-11-19",
+    color: "#ec4899",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },

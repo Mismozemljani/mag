@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import type { Item, InputHistory, Reservation, Pickup } from "@/lib/types"
 
+const safeNumber = (value: any): number => {
+  const num = Number(value)
+  return isNaN(num) || !isFinite(num) ? 0 : num
+}
+
 interface StockHistoryDialogProps {
   item: Item
   inputHistory: InputHistory[]
@@ -35,7 +40,8 @@ export function StockHistoryDialog({
       quantity: h.quantity,
       person: h.supplier,
       code: "-",
-      details: `${h.price.toFixed(2)} RSD po jedinici`,
+      // Use safeNumber for price to prevent NaN
+      details: `${safeNumber(h.price).toFixed(2)} RSD po jedinici`,
     })),
     ...itemReservations.map((r) => ({
       date: r.reserved_at,
@@ -77,12 +83,12 @@ export function StockHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Istorija Stanja - {item.name}</DialogTitle>
           <DialogDescription>
-            Šifra: {item.code} | Trenutno stanje: {item.stock} | Rezervisano: {item.reserved} | Dostupno:{" "}
-            {item.available}
+            Šifra: {item.code} | Trenutno stanje: {safeNumber(item.stock)} | Rezervisano: {safeNumber(item.reserved)} |
+            Dostupno: {safeNumber(item.available)}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,15 +96,15 @@ export function StockHistoryDialog({
           <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
             <div>
               <div className="text-sm text-muted-foreground">Ukupan Ulaz</div>
-              <div className="text-2xl font-bold text-green-600">{totalInput}</div>
+              <div className="text-2xl font-bold text-green-600">{safeNumber(totalInput)}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Ukupno Rezervisano</div>
-              <div className="text-2xl font-bold text-yellow-600">{totalReserved}</div>
+              <div className="text-2xl font-bold text-yellow-600">{safeNumber(totalReserved)}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">Ukupno Preuzeto</div>
-              <div className="text-2xl font-bold text-blue-600">{totalPickedUp}</div>
+              <div className="text-2xl font-bold text-blue-600">{safeNumber(totalPickedUp)}</div>
             </div>
           </div>
 
@@ -139,10 +145,10 @@ export function StockHistoryDialog({
                         </span>
                       </TableCell>
                       <TableCell
-                        className={`text-right font-medium ${change.quantity > 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`text-right font-medium ${safeNumber(change.quantity) > 0 ? "text-green-600" : "text-red-600"}`}
                       >
-                        {change.quantity > 0 ? "+" : ""}
-                        {change.quantity}
+                        {safeNumber(change.quantity) > 0 ? "+" : ""}
+                        {safeNumber(change.quantity)}
                       </TableCell>
                       <TableCell>{change.person}</TableCell>
                       <TableCell className="font-mono text-xs">{change.code}</TableCell>

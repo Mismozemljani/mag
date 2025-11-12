@@ -3,15 +3,16 @@
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, Maximize2, Minimize2, FileText } from "lucide-react"
 import type { Project } from "@/lib/types"
 
 interface ProjectCalendarProps {
   projects: Project[]
   onClose: () => void
+  onViewPdf?: (project: Project) => void
 }
 
-export function ProjectCalendar({ projects, onClose }: ProjectCalendarProps) {
+export function ProjectCalendar({ projects, onClose, onViewPdf }: ProjectCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -120,18 +121,34 @@ export function ProjectCalendar({ projects, onClose }: ProjectCalendarProps) {
       <div className="grid grid-cols-7 gap-0">{days}</div>
 
       <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-        <h4 className="font-semibold mb-2 text-sm">Aktivni Projekti:</h4>
-        <div className="space-y-2">
+        <h4 className="font-semibold mb-3 text-sm">Aktivni Projekti:</h4>
+        <div className="flex flex-wrap gap-4">
           {projects.map((project) => (
-            <div key={project.id} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
+            <div key={project.id} className="border-l-4 pl-3 py-2 flex-shrink-0" style={{ borderColor: project.color }}>
+              <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded border border-slate-300" style={{ backgroundColor: project.color }} />
-                <span className="font-medium">{project.name}</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium whitespace-nowrap">{project.name}</span>
+                    {project.pdf_url && project.pdf_document && (
+                      <>
+                        <span className="text-muted-foreground">•</span>
+                        <button
+                          onClick={() => onViewPdf?.(project)}
+                          className="text-sm text-blue-600 hover:underline flex items-center gap-1 whitespace-nowrap"
+                        >
+                          <FileText className="h-3 w-3 text-red-600" />
+                          {project.pdf_document}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5 whitespace-nowrap">
+                    {new Date(project.start_date).toLocaleDateString("sr-RS")} -{" "}
+                    {new Date(project.end_date).toLocaleDateString("sr-RS")}
+                  </div>
+                </div>
               </div>
-              <span className="text-muted-foreground">
-                {new Date(project.start_date).toLocaleDateString("sr-RS")} -{" "}
-                {new Date(project.end_date).toLocaleDateString("sr-RS")}
-              </span>
             </div>
           ))}
         </div>

@@ -52,7 +52,7 @@ export function EditItemDialog({ item, open, onOpenChange, onUpdateItem }: EditI
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Izmeni Artikal</DialogTitle>
           <DialogDescription>Ažurirajte podatke o artiklu</DialogDescription>

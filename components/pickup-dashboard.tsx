@@ -19,6 +19,14 @@ export function PickupDashboard() {
   const [isPickupDialogOpen, setIsPickupDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
+  const safeNumber = (value: any, decimals = 0): string => {
+    const num = Number(value)
+    if (isNaN(num) || value === null || value === undefined) {
+      return decimals > 0 ? "0." + "0".repeat(decimals) : "0"
+    }
+    return decimals > 0 ? num.toFixed(decimals) : num.toString()
+  }
+
   const filteredItems = items.filter((item) => {
     const query = searchQuery.toLowerCase()
     return (
@@ -92,7 +100,7 @@ export function PickupDashboard() {
                           <TableRow key={item.id}>
                             <TableCell className="font-mono font-medium">{item.code}</TableCell>
                             <TableCell className="font-medium">{item.name}</TableCell>
-                            <TableCell className="text-right">{item.stock}</TableCell>
+                            <TableCell className="text-right">{safeNumber(item.stock)}</TableCell>
                             <TableCell className="text-right">
                               <Button variant="outline" size="sm" onClick={() => handlePickup(item.id)}>
                                 <Package className="h-4 w-4 mr-1" />
@@ -148,7 +156,7 @@ export function PickupDashboard() {
                             <TableRow key={pickup.id}>
                               <TableCell className="font-medium">{item?.name}</TableCell>
                               <TableCell className="font-mono">{item?.code}</TableCell>
-                              <TableCell className="text-right">{pickup.quantity}</TableCell>
+                              <TableCell className="text-right">{safeNumber(pickup.quantity)}</TableCell>
                               <TableCell>{pickup.picked_up_by}</TableCell>
                               <TableCell>{new Date(pickup.picked_up_at).toLocaleString("sr-RS")}</TableCell>
                               <TableCell>

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, Key } from "lucide-react"
 import { mockUsers } from "@/lib/mock-data"
 
 interface UserManagementDialogProps {
@@ -20,6 +20,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
   const [newUserName, setNewUserName] = useState("")
   const [newUserEmail, setNewUserEmail] = useState("")
   const [newUserRole, setNewUserRole] = useState<"MAGACIN_ADMIN" | "REZERVACIJA" | "PREUZIMANJE">("REZERVACIJA")
+  const [newUserCode, setNewUserCode] = useState("")
 
   const handleAddUser = () => {
     if (!newUserName.trim()) return
@@ -29,12 +30,14 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
       name: newUserName,
       email: newUserEmail || `${newUserName.toLowerCase().replace(/\s+/g, ".")}@magacin.rs`,
       role: newUserRole,
+      userCode: newUserCode.trim() || undefined,
     }
 
     setUsers([...users, newUser])
     setNewUserName("")
     setNewUserEmail("")
     setNewUserRole("REZERVACIJA")
+    setNewUserCode("")
 
     // Update mock data
     mockUsers.push(newUser)
@@ -54,7 +57,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Upravljanje Korisnicima</DialogTitle>
           <DialogDescription>Dodajte ili uklonite korisnike za sve uloge</DialogDescription>
@@ -63,7 +66,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
         <div className="space-y-6">
           <div className="border rounded-lg p-4">
             <h3 className="font-medium mb-4">Dodaj Novog Korisnika</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="userName">Ime i Prezime *</Label>
                 <Input
@@ -96,6 +99,19 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="userCode" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  Jedinstvena Šifra (opciono)
+                </Label>
+                <Input
+                  id="userCode"
+                  value={newUserCode}
+                  onChange={(e) => setNewUserCode(e.target.value)}
+                  placeholder="npr. USR001"
+                  maxLength={20}
+                />
+              </div>
             </div>
             <Button onClick={handleAddUser} className="mt-4">
               <Plus className="h-4 w-4 mr-2" />
@@ -110,6 +126,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                 <TableRow>
                   <TableHead>Ime</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Šifra</TableHead>
                   <TableHead className="w-[100px]">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -118,6 +135,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell className="font-mono">{(user as any).userCode || "-"}</TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
                         <Trash2 className="h-4 w-4" />
@@ -136,6 +154,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                 <TableRow>
                   <TableHead>Ime</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Šifra</TableHead>
                   <TableHead className="w-[100px]">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -144,6 +163,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell className="font-mono">{(user as any).userCode || "-"}</TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
                         <Trash2 className="h-4 w-4" />
@@ -162,6 +182,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                 <TableRow>
                   <TableHead>Ime</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Šifra</TableHead>
                   <TableHead className="w-[100px]">Akcije</TableHead>
                 </TableRow>
               </TableHeader>
@@ -170,6 +191,7 @@ export function UserManagementDialog({ open, onOpenChange }: UserManagementDialo
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell className="font-mono">{(user as any).userCode || "-"}</TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
                         <Trash2 className="h-4 w-4" />
