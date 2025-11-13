@@ -89,7 +89,7 @@ export function PickupDialog({ item, open, onOpenChange, onAddPickup }: PickupDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="resize">
+      <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Preuzimanje Artikla</DialogTitle>
           <DialogDescription>

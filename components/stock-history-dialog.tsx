@@ -181,7 +181,7 @@ export function StockHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto resize">
+      <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto resize">
         <DialogHeader>
           <DialogTitle>Istorija Stanja - {item.name}</DialogTitle>
           <DialogDescription>
